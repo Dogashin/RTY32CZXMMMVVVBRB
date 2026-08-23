@@ -151,11 +151,15 @@
     items.forEach(function (el) { io.observe(el); });
   }
 
+  function cleanUrl() {
+    if (!history.replaceState) return;
+    history.replaceState(null, '', window.location.pathname);
+  }
+
   function isInternalPage(url) {
     if (url.origin !== window.location.origin) return false;
     if (url.protocol === 'mailto:') return false;
-    const file = url.pathname.split('/').pop();
-    return file === '' || file.endsWith('.html');
+    return true;
   }
 
   document.addEventListener('click', function (event) {
@@ -169,24 +173,32 @@
     const url = new URL(link.getAttribute('href'), window.location.href);
     if (!isInternalPage(url)) return;
 
-    const samePage = url.pathname === window.location.pathname;
+    const samePage = url.pathname.replace(/\/+$/, '') === window.location.pathname.replace(/\/+$/, '');
 
     if (samePage && url.hash) {
       event.preventDefault();
       scrollToHash(url.hash);
-      if (history.pushState) history.pushState(null, '', url.hash);
+      cleanUrl();
       return;
     }
 
-    if (samePage) return;
+    if (samePage) {
+      event.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: reduceMotion ? 'auto' : 'smooth'
+      });
+      cleanUrl();
+      return;
+    }
 
     event.preventDefault();
-    const file = url.pathname.split('/').pop();
-    if (file === 'work.html') {
+    const path = url.pathname.replace(/\/+$/, '');
+    if (path.endsWith('/work') || path.endsWith('work.html')) {
       launchCutTo(link.href);
       return;
     }
-    leaveTo(link.href);
+    leaveTo(url.href);
   });
 
   function initMobileNav() {
@@ -229,6 +241,7 @@
     if (pendingHash) {
       window.setTimeout(function () {
         scrollToHash(pendingHash, reduceMotion ? 'auto' : 'smooth');
+        cleanUrl();
       }, reduceMotion ? 0 : 280);
     }
   }
