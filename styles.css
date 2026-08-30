@@ -324,7 +324,7 @@
     .portfolio-grid {
       display:grid;
       grid-template-columns:repeat(3, 1fr);
-      align-items:stretch;
+      align-items:start;
       gap:22px;
       margin-top:28px;
     }
@@ -339,6 +339,9 @@
     .work-card[data-format="short-form"] {
       width:86%;
       justify-self:center;
+    }
+    .work-card[data-format="long-form"] + .work-card[data-format="short-form"] {
+      grid-column-start: 1;
     }
     .work-card:hover {
       transform: translateY(-6px);
@@ -373,7 +376,6 @@
     }
     .work-card:hover .play-mini { background:var(--cyan); color:#001016; box-shadow:0 0 24px rgba(32,217,255,.45); }
     .work-info {
-      flex:1;
       display:flex;
       flex-direction:column;
       padding:18px 16px 16px;
